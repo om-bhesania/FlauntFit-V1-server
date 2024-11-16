@@ -11,12 +11,12 @@ import productRouter from "./Routes/productRoutes.js";
 // Initialize Express app
 const app = express();
 
-// Configure CORS to allow your frontend domain
+// Configure CORS
 app.use(
   cors({
-    origin: "https://flunt-fit-v1-client.vercel.app", // Replace "*" with your frontend URL for production
+    origin: "https://flunt-fit-v1-client.vercel.app", // Replace with your frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // If cookies or tokens are used
+    credentials: true,
   })
 );
 
@@ -34,15 +34,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Define publicly accessible routes
-app.use("/v1/users", userRoutes); // No authentication required
-app.use("/v1/auth", authRoutes); // No authentication required
-app.use("/v1/products", productRouter); // No authentication required
+// Define a root route to display "hello"
+app.get("/", (req, res) => {
+  res.send("hello");
+});
 
-// Sync Sequelize models and prepare for serverless deployment
+// Define routes
+app.use("/v1/users", userRoutes);
+app.use("/v1/auth", authRoutes);
+app.use("/v1/products", productRouter);
+
+// Sync Sequelize models
 const prepareServer = async () => {
   try {
-    // Ensure database credentials are loaded from environment variables
     await sequelize.authenticate();
     await sequelize.sync();
     console.log("Database connected successfully");
