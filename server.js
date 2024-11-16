@@ -7,6 +7,7 @@ import sequelize from "./config/config.js"; // Ensure DB connection credentials 
 import userRoutes from "./Routes/userRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import productRouter from "./Routes/productRoutes.js";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 // Initialize Express app
 const app = express();
@@ -58,5 +59,7 @@ const prepareServer = async () => {
 // Call the function to prepare the server
 prepareServer();
 
-// Export the app for Vercel's serverless environment
-export default app;
+// Vercel serverless function export
+export default (req, res) => {
+  app(req, res);
+};
