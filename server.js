@@ -14,9 +14,7 @@ const app = express();
 // Configure CORS to allow your frontend domain
 app.use(
   cors({
-    origin:
-      "https://flunt-fit-v1-client.vercel.app/" ||
-      "https://flunt-fit-v1-client.vercel.app", // Replace "*" with your frontend URL for production
+    origin: "https://flunt-fit-v1-client.vercel.app", // Replace "*" with your frontend URL for production
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // If cookies or tokens are used
   })
@@ -30,16 +28,16 @@ app.use(bodyParser.json());
 
 // Rate limiting middleware
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter);
 
-// Define routes
-app.use("/v1/users", userRoutes);
-app.use("/v1/auth", authRoutes);
-app.use("/v1/products", productRouter);
+// Define publicly accessible routes
+app.use("/v1/users", userRoutes); // No authentication required
+app.use("/v1/auth", authRoutes); // No authentication required
+app.use("/v1/products", productRouter); // No authentication required
 
 // Sync Sequelize models and prepare for serverless deployment
 const prepareServer = async () => {
@@ -53,7 +51,7 @@ const prepareServer = async () => {
   }
 };
 
-// Call the function to prepare the server  
+// Call the function to prepare the server
 prepareServer();
 
 // Export the app for Vercel's serverless environment
