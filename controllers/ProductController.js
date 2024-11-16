@@ -76,8 +76,7 @@ const validateProductData = (data) => {
 };
 
 const formatErrorResponse = (errors) => {
-  const messages = Object.values(errors);
-  console.log(messages);
+  const messages = Object.values(errors); 
   return {
     messages,
   };

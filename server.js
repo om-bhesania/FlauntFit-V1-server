@@ -6,13 +6,15 @@ import rateLimit from "express-rate-limit";
 import sequelize from "./config/config.js";
 import userRoutes from "./Routes/userRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
+import productRouter from "./Routes/productRoutes.js";
 
-import productRouter from "./Routes/productRoutes.js"; 
+// Initialize Express app
 const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 
+// Rate limiting middleware
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -20,21 +22,24 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const startServer = async () => {
+// Define routes
+app.use("/v1/users", userRoutes);
+app.use("/v1/auth", authRoutes);
+app.use("/v1/products", productRouter);
+
+// Sync Sequelize models and prepare for serverless deployment
+const prepareServer = async () => {
   try {
     await sequelize.authenticate();
     await sequelize.sync();
-    app.listen(3000, () => {
-      console.log("Server is running on port 3000");
-    });
+    console.log("Database connected successfully");
   } catch (error) {
     console.error("Unable to connect to the database:", error);
   }
 };
 
-// Corrected route paths with leading slashes
-app.use("/v1/users", userRoutes);
-app.use("/v1/auth", authRoutes); 
-app.use("/v1/products", productRouter); 
+// Vercel requires exporting the app as the default export
+prepareServer();
 
-startServer();
+// Export the app for Vercel's serverless environment
+export default app;
