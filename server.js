@@ -14,7 +14,7 @@ const app = express();
 // Configure CORS to allow your frontend domain
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "*", // Replace "*" with your frontend URL for production
+    origin: "https://flunt-fit-v1-client.vercel.app/" || "*", // Replace "*" with your frontend URL for production
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // If cookies or tokens are used
   })
@@ -51,7 +51,7 @@ const prepareServer = async () => {
   }
 };
 
-// Call the function to prepare the server
+// Call the function to prepare the server  
 prepareServer();
 
 // Export the app for Vercel's serverless environment
