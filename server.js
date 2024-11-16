@@ -14,7 +14,9 @@ const app = express();
 // Configure CORS to allow your frontend domain
 app.use(
   cors({
-    origin: "https://flunt-fit-v1-client.vercel.app/" || "*", // Replace "*" with your frontend URL for production
+    origin:
+      "https://flunt-fit-v1-client.vercel.app/" ||
+      "https://flunt-fit-v1-client.vercel.app", // Replace "*" with your frontend URL for production
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // If cookies or tokens are used
   })
