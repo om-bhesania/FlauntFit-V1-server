@@ -3,15 +3,27 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import sequelize from "./config/config.js";
+import sequelize from "./config/config.js"; // Ensure DB connection credentials are production-ready
 import userRoutes from "./Routes/userRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import productRouter from "./Routes/productRoutes.js";
 
 // Initialize Express app
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow your frontend domain
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN || "*", // Replace "*" with your frontend URL for production
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // If cookies or tokens are used
+  })
+);
+
+// Security headers
 app.use(helmet());
+
+// Body parser middleware
 app.use(bodyParser.json());
 
 // Rate limiting middleware
@@ -30,6 +42,7 @@ app.use("/v1/products", productRouter);
 // Sync Sequelize models and prepare for serverless deployment
 const prepareServer = async () => {
   try {
+    // Ensure database credentials are loaded from environment variables
     await sequelize.authenticate();
     await sequelize.sync();
     console.log("Database connected successfully");
@@ -38,7 +51,7 @@ const prepareServer = async () => {
   }
 };
 
-// Vercel requires exporting the app as the default export
+// Call the function to prepare the server
 prepareServer();
 
 // Export the app for Vercel's serverless environment
