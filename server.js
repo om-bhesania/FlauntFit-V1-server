@@ -1,12 +1,12 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import sequelize from "./config/config.js"; // Ensure DB connection credentials are production-ready
+import userRoutes from "./Routes/userRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import productRouter from "./Routes/productRoutes.js";
-import userRoutes from "./Routes/userRoutes.js";
 
 // Initialize Express app
 const app = express();
@@ -58,7 +58,8 @@ const prepareServer = async () => {
 // Call the function to prepare the server
 prepareServer();
 
-// Vercel serverless function export
-export default (req, res) => {
-  app(req, res);
-};
+// Bind to a port
+const PORT = process.env.PORT || 3000; // Use the PORT environment variable or default to 3000
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
