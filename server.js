@@ -1,13 +1,12 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import sequelize from "./config/config.js"; // Ensure DB connection credentials are production-ready
-import userRoutes from "./Routes/userRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import productRouter from "./Routes/productRoutes.js";
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import userRoutes from "./Routes/userRoutes.js";
 
 // Initialize Express app
 const app = express();
