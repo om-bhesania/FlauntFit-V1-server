@@ -7,6 +7,7 @@ import sequelize from "./config/config.js"; // Ensure DB connection credentials 
 import userRoutes from "./Routes/userRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import productRouter from "./Routes/productRoutes.js";
+import fileUploadRouter from "./Routes/fileUploadRouter.js";
 
 // Initialize Express app
 const app = express();
@@ -14,7 +15,8 @@ const app = express();
 // Configure CORS
 app.use(
   cors({
-    origin: "https://flunt-fit-v1-client.vercel.app", // Replace with your frontend URL
+    origin: "http://localhost:5173", // Replace with your frontend URL
+    // "https://flunt-fit-v1-client.vercel.app" || "http://localhost:5173", // Replace with your frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -43,6 +45,7 @@ app.get("/", (req, res) => {
 app.use("/v1/users", userRoutes);
 app.use("/v1/auth", authRoutes);
 app.use("/v1/products", productRouter);
+app.use("/v1/upload", fileUploadRouter);
 
 // Sync Sequelize models
 const prepareServer = async () => {
@@ -59,7 +62,7 @@ const prepareServer = async () => {
 prepareServer();
 
 // Bind to a port
-const PORT = process.env.PORT || 3000; // Use the PORT environment variable or default to 3000
+const PORT = process.env.PORT || 3012; // Use the PORT environment variable or default to 3000
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
