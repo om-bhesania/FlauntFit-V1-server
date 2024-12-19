@@ -66,13 +66,6 @@ const uploadFiles = async (req, res) => {
     return res.status(500).json({ error: "File upload failed" });
   }
 };
-// Define the upload endpoint
-app.post("/upload", uploadFiles);
-
-// Start the server
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+ 
 
 export default uploadFiles;
