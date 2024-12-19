@@ -1,46 +1,78 @@
-import { put } from "@vercel/blob";
+import express from "express";
+import mongoose from "mongoose";
+import axios from "axios";
+import dotenv from "dotenv";
+import fileUpload from "express-fileupload";
 
-const uploadFile = async (req, res) => {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
-    return res.status(405).send("Method Not Allowed");
-  }
+dotenv.config();
 
+const app = express();
+app.use(express.json());
+app.use(fileUpload()); // Middleware for handling file uploads
+
+// Mongoose schema and model for storing file metadata
+const fileSchema = new mongoose.Schema({
+  fileName: { type: String, required: true },
+  contentType: { type: String, required: true },
+  url: { type: String, required: true },
+  uploadedAt: { type: Date, default: Date.now },
+});
+const File = mongoose.model("File", fileSchema);
+
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || "865426e7f41e850"; // Imgur Client ID
+
+const uploadFiles = async (req, res) => {
   try {
-    const { file, fileName, contentType } = req.body;
+    const file = req.files?.file; // Get the uploaded file
 
-    // Validate the required fields
-    if (!file || !fileName || !contentType) {
-      return res.status(400).json({ error: "Invalid file data." });
+    if (!file) {
+      return res.status(400).json({ error: "No file provided" });
     }
 
-    // Convert file data from base64 to a Buffer
-    const fileBuffer = Buffer.from(file.split(",")[1], "base64"); // Remove the data URL part
+    // Use the form-data package
+    const formData = new FormData();
+    formData.append("image", file.data); // Use file data directly
 
-    // Check the file size before attempting to upload
-    if (fileBuffer.length > 50 * 1024 * 1024) {
-      // 50MB limit
-      return res.status(413).json({ error: "File is too large" });
+    const imgurResponse = await axios.post(
+      "https://api.imgur.com/3/upload",
+      formData,
+      {
+        headers: {
+          Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,  
+        },
+      }
+    );
+
+    if (imgurResponse.data.success) {
+      const imageUrl = imgurResponse.data.data.link;
+
+      // Save file information in the database
+      const newFile = new File({
+        fileName: file.name,
+        contentType: file.mimetype,
+        url: imageUrl,
+      });
+      await newFile.save();
+
+      return res.status(200).json({
+        message: "File uploaded successfully",
+        data: { url: imageUrl },
+      });
+    } else {
+      return res.status(500).json({ error: "Failed to upload file to Imgur" });
     }
-
-    // Upload the file to Vercel Blob
-    const { url } = await put(fileName, fileBuffer, {
-      contentType,
-      access: "public", // Adjust access settings as needed
-    });
-
-    // Respond with the URL of the uploaded file
-    return res.status(200).json({ url });
   } catch (error) {
     console.error("Error uploading file:", error);
-
-    // Handle specific error cases
-    if (error.message.includes("413")) {
-      return res.status(413).json({ error: "File is too large" });
-    }
-
-    return res.status(500).json({ error: "Failed to upload file." });
+    return res.status(500).json({ error: "File upload failed" });
   }
 };
+// Define the upload endpoint
+app.post("/upload", uploadFiles);
 
-export default uploadFile;
+// Start the server
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
+export default uploadFiles;

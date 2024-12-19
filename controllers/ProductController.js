@@ -59,14 +59,7 @@ const validateProductData = (data) => {
   if (data.careInstructions && data.careInstructions.length > 500) {
     errors.careInstructions = "Care instructions can't exceed 500 characters";
   }
-  if (
-    !data.mediaContent ||
-    !Array.isArray(data.mediaContent) ||
-    data.mediaContent.length === 0
-  ) {
-    errors.mediaContent = "At least one product image is required";
-  }
-
+  
   const validStatuses = ["In Stock", "Out of Stock", "Discontinued"];
   if (!data.inventoryStatus || !validStatuses.includes(data.inventoryStatus)) {
     errors.inventoryStatus = "Invalid status";
@@ -76,19 +69,22 @@ const validateProductData = (data) => {
 };
 
 const formatErrorResponse = (errors) => {
-  const messages = Object.values(errors); 
+  const messages = Object.values(errors);
   return {
     messages,
   };
 };
+
 export const createProduct = async (req, res) => {
+  console.log(req.body);
   const errors = validateProductData(req.body);
   if (Object.keys(errors).length) {
     return res.status(400).json(formatErrorResponse(errors));
   }
 
   try {
-    const newProduct = await Product.create(req.body);
+    const newProduct = new Product(req.body); // Using Mongoose to create a product instance
+    await newProduct.save(); // Save to MongoDB
     return res.status(201).json({
       message: "Product created successfully",
       newProduct,
@@ -100,7 +96,7 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.find(); // Find all products using Mongoose
     return res.status(200).json({
       message: "Products retrieved successfully",
       count: products.length,
@@ -113,12 +109,11 @@ export const getProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.findById(req.params.id); // Find a product by ID using Mongoose
     if (!product) return res.status(404).json({ message: "Product not found" });
     return res.status(200).json({
       message: "Product retrieved successfully",
       product,
-      count: product.length,
     });
   } catch (error) {
     return res.status(500).json(formatErrorResponse(error));
@@ -132,15 +127,16 @@ export const updateProduct = async (req, res) => {
   }
 
   try {
-    const [updatedRows, updatedProducts] = await Product.update(req.body, {
-      where: { id: req.params.id },
-      returning: true,
-    });
-    if (!updatedRows)
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } // Return the updated product after update
+    );
+    if (!updatedProduct)
       return res.status(404).json({ message: "Product not found" });
     return res.status(200).json({
       message: "Product updated successfully",
-      updatedProduct: updatedProducts[0],
+      updatedProduct,
     });
   } catch (error) {
     return res.status(500).json(formatErrorResponse(error));
@@ -149,9 +145,7 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const deletedProduct = await Product.destroy({
-      where: { id: req.params.id },
-    });
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id); // Delete product by ID using Mongoose
     if (!deletedProduct)
       return res.status(404).json({ message: "Product not found" });
     return res.status(204).send({

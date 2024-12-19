@@ -1,105 +1,100 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../config/config.js";
+import mongoose from "mongoose";
 
-const Product = sequelize.define(
-  "Product",
+// Define the schema for the Product model
+const ProductSchema = new mongoose.Schema(
   {
     productName: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
     productDescription: {
-      type: DataTypes.STRING,
+      type: String,
       validate: {
-        len: {
-          args: [0, 1000],
-          msg: "Description can't exceed 1000 characters",
-        },
+        validator: (value) => value.length <= 1000,
+        message: "Description can't exceed 1000 characters",
       },
     },
     category: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
     subcategory: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
     productType: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
     brand: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
     price: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
+      type: Number,
+      required: true,
       validate: {
-        isFloat: { msg: "Price must be a positive number" },
-        min: 0,
+        validator: (value) => value >= 0,
+        message: "Price must be a positive number",
       },
     },
     salePrice: {
-      type: DataTypes.FLOAT,
+      type: Number,
       validate: {
-        isFloat: true,
-        min: 0,
-        max(value) {
-          if (value > this.price) {
-            throw new Error("Sale Price should be less than or equal to Price");
-          }
+        validator: function (value) {
+          return value >= 0 && value <= this.price;
         },
+        message: "Sale Price should be less than or equal to Price",
       },
     },
     sku: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
     quantityInStock: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      type: Number,
+      required: true,
       validate: {
-        min: 0,
+        validator: (value) => value >= 0,
+        message: "Quantity in stock must be a positive number",
       },
     },
     productImages: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-      defaultValue: [],
+      type: [String], // Array of strings
+      default: [],
     },
-
     video: {
-      type: DataTypes.STRING,
+      type: String,
     },
     sizeOptions: {
-      type: DataTypes.STRING,
+      type: String,
     },
     colorOptions: {
-      type: DataTypes.STRING,
+      type: String,
     },
     careInstructions: {
-      type: DataTypes.STRING,
+      type: String,
       validate: {
-        len: {
-          args: [0, 500],
-          msg: "Care instructions can't exceed 500 characters",
-        },
+        validator: (value) => value.length <= 500,
+        message: "Care instructions can't exceed 500 characters",
       },
     },
     inventoryStatus: {
-      type: DataTypes.ENUM("In Stock", "Out of Stock", "Discontinued"),
-      allowNull: false,
+      type: String,
+      enum: ["In Stock", "Out of Stock", "Discontinued"],
+      required: true,
     },
     countryOfOrigin: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
+
+// Create and export the Product model
+const Product = mongoose.model("Product", ProductSchema);
 
 export default Product;

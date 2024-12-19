@@ -3,7 +3,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { body, validationResult } from "express-validator";
-import User from "../models/User.js";
+import User from "../models/User.js"; // Ensure your User model is set up with Mongoose
 
 const authRoutes = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; // Use a strong secret in production
@@ -30,13 +30,26 @@ authRoutes.post(
 
     const { username, email, password, contact } = req.body;
     try {
-      const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
-      const user = await User.create({
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create the new user
+      const user = new User({
         name: username,
         email,
         password: hashedPassword,
         contact,
       });
+
+      // Save the user to the database
+      await user.save();
+
       res.status(200).json({ message: "User registered successfully", user });
     } catch (error) {
       console.error(error);
@@ -60,17 +73,21 @@ authRoutes.post(
 
     const { email, password } = req.body;
     try {
-      const user = await User.findOne({ where: { email } });
+      // Find user by email
+      const user = await User.findOne({ email });
       if (!user) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      // Compare the provided password with the stored hashed password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1h" }); // Generate JWT token
+      // Generate JWT token
+      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
       res.json({ token });
     } catch (error) {
       console.error(error);

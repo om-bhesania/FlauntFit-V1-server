@@ -1,23 +1,42 @@
-// db.config.js
-import { Sequelize } from "sequelize";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
- 
-const sequelize = new Sequelize(
-  process.env.VITE_REACT_PSQL ||
-    "postgres://default:KhCNb8m5vsai@ep-aged-base-a1551f72.ap-southeast-1.aws.neon.tech:5432/verceldb?sslmode=require",
-  {
-    logging: true,
-    dialect: "postgres",
-  }
-);
+// Load environment variables
+dotenv.config();
+
+const mongoURI =
+  process.env.VITE_REACT_MONGO_URI ||
+  "mongodb+srv://root:root@maincluster.xencs.mongodb.net/mixbunch";
 
 export const db = async () => {
   try {
-    await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    mongoose.connection.on("connected", () => {
+      console.log("Mongoose connected to MongoDB.");
+    });
+
+    mongoose.connection.on("error", (err) => {
+      console.error("Mongoose connection error:", err);
+    });
+
+    mongoose.connection.on("disconnected", () => {
+      console.log("Mongoose disconnected from MongoDB.");
+    });
+
+    // Handle process termination
+    process.on("SIGINT", async () => {
+      await mongoose.connection.close();
+      console.log("Mongoose connection closed on app termination.");
+      process.exit(0);
+    });
+
+    console.log("MongoDB connection established successfully.");
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("Unable to connect to MongoDB:", error.message);
   }
 };
 
-export default sequelize; 
+export default mongoose;
