@@ -59,19 +59,19 @@ const ProductSchema = new mongoose.Schema(
         message: "Quantity in stock must be a positive number",
       },
     },
-    productImages: {
-      type: [String], // Array of strings
-      default: [],
-    },
+    // productImages: {
+    //   type: [String], // Array of strings
+    //   default: [],
+    // },
     video: {
       type: String,
     },
     sizeOptions: {
       type: String,
     },
-    colorOptions: {
-      type: String,
-    },
+    // colorOptions: {
+    //   type: String,
+    // },
     careInstructions: {
       type: String,
       validate: {
@@ -84,10 +84,10 @@ const ProductSchema = new mongoose.Schema(
       enum: ["In Stock", "Out of Stock", "Discontinued"],
       required: true,
     },
-    countryOfOrigin: {
-      type: String,
-      required: true,
-    },
+    // countryOfOrigin: {
+    //   type: String,
+    //   required: true,
+    // },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
@@ -95,6 +95,6 @@ const ProductSchema = new mongoose.Schema(
 );
 
 // Create and export the Product model
-const Product = mongoose.model("Product", ProductSchema);
+const Product = mongoose.model("Products", ProductSchema);
 
 export default Product;

@@ -1,4 +1,5 @@
 import Product from "../models/ProductsModel.js"; // Ensure correct import path
+import mongoose from "mongoose";
 
 // Custom validation function for product data
 const validateProductData = (data) => {
@@ -34,7 +35,7 @@ const validateProductData = (data) => {
     errors.price = "Price must be a positive number";
   }
 
-  if (data.salePrice !== undefined) {
+  if (data.salePrice) {
     if (data.salePrice <= 0) {
       errors.salePrice = "Sale Price must be positive";
     } else if (data.salePrice > data.price) {
@@ -59,7 +60,7 @@ const validateProductData = (data) => {
   if (data.careInstructions && data.careInstructions.length > 500) {
     errors.careInstructions = "Care instructions can't exceed 500 characters";
   }
-  
+
   const validStatuses = ["In Stock", "Out of Stock", "Discontinued"];
   if (!data.inventoryStatus || !validStatuses.includes(data.inventoryStatus)) {
     errors.inventoryStatus = "Invalid status";
@@ -90,6 +91,7 @@ export const createProduct = async (req, res) => {
       newProduct,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json(formatErrorResponse(error));
   }
 };
@@ -103,7 +105,7 @@ export const getProducts = async (req, res) => {
       products,
     });
   } catch (error) {
-    return res.status(500).json(formatErrorResponse(error));
+    return res.status(500).json("Something went wrong with the server");
   }
 };
 
@@ -126,10 +128,20 @@ export const updateProduct = async (req, res) => {
     return res.status(400).json({ errors });
   }
 
+  // Modify the payload to replace 0 or empty fields with an empty string
+  const updatedPayload = Object.keys(req.body).reduce((acc, key) => {
+    if (req.body[key] === 0 || req.body[key] === "") {
+      acc[key] = ""; // Set to empty string if value is 0 or empty
+    } else {
+      acc[key] = req.body[key]; // Otherwise, retain the original value
+    }
+    return acc;
+  }, {});
+
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updatedPayload,
       { new: true } // Return the updated product after update
     );
     if (!updatedProduct)
@@ -143,15 +155,51 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+
 export const deleteProduct = async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id); // Delete product by ID using Mongoose
-    if (!deletedProduct)
+    if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });
-    return res.status(204).send({
-      message: "Product deleted successfully",
-    }); // No content
+    }
+    // Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid product ID format",
+      });
+    }
+    return res.status(200).json({ message: "Product deleted successfully" }); // Include success message
   } catch (error) {
-    return res.status(500).json(formatErrorResponse(error));
+    return res.status(500).json({
+      message: "An error occurred while deleting the product",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteAllProducts = async (req, res) => {
+  try {
+    // Delete all products in the collection
+    const result = await Product.deleteMany({});
+    // Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid product ID format",
+      });
+    }
+    // Check if any documents were deleted
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "No products found to delete" });
+    }
+
+    return res.status(200).json({
+      message: "All products deleted successfully",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occurred while deleting products",
+      error: error.message,
+    });
   }
 };
