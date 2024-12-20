@@ -9,16 +9,31 @@ import authRoutes from "./Routes/authRoutes.js";
 import productRouter from "./Routes/productRoutes.js";
 import fileUploadRouter from "./Routes/fileUploadRouter.js";
 import fileUpload from "express-fileupload";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 // Initialize Express app
 const app = express();
 
-// Configure CORS
+// Define allowed origins based on environment
+const allowedOrigins = [
+  "http://localhost:5173", // Development URL
+  "https://mixbunch-dev.netlify.app/", // Production URL
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend URL
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., mobile apps or Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS not allowed by this server"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    credentials: true, // Include credentials (cookies) in the request
   })
 );
 
@@ -26,7 +41,8 @@ app.use(
 app.use(helmet());
 
 // Body parser middleware
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "40mb" })); // Allows up to 40MB payloads
+app.use(bodyParser.urlencoded({ limit: "40mb", extended: true }));
 
 // Rate limiting middleware
 const limiter = rateLimit({
@@ -34,9 +50,6 @@ const limiter = rateLimit({
   max: 100, // Limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
 });
-// Increase the payload limit for large base64-encoded images
-app.use(bodyParser.json({ limit: "40mb" })); // Allows up to 10MB payloads
-app.use(bodyParser.urlencoded({ limit: "40mb", extended: true }));
 app.use(limiter);
 
 // Define a root route to display "hello"
