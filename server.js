@@ -25,13 +25,10 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., mobile apps or Postman)
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("CORS not allowed by this server"));
-    },
+    origin: [
+      "http://localhost:5173", // Development URL
+      "https://mixbunch-dev.netlify.app/", // Production URL
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // Include credentials (cookies) in the request
   })
