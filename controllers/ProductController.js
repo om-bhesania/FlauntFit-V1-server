@@ -61,9 +61,9 @@ const validateProductData = (data) => {
     errors.careInstructions = "Care instructions can't exceed 500 characters";
   }
 
-  const validStatuses = ["In Stock", "Out of Stock", "Discontinued"];
+  const validStatuses = ["In Stock", "Out of Stock", "Discontinued", "Coming Soon"];
   if (!data.inventoryStatus || !validStatuses.includes(data.inventoryStatus)) {
-    errors.inventoryStatus = "Invalid status";
+    errors.inventoryStatus = "Invalid Inventory status";
   }
 
   return errors;
@@ -77,7 +77,6 @@ const formatErrorResponse = (errors) => {
 };
 
 export const createProduct = async (req, res) => {
-  console.log(req.body);
   const errors = validateProductData(req.body);
   if (Object.keys(errors).length) {
     return res.status(400).json(formatErrorResponse(errors));
@@ -86,6 +85,7 @@ export const createProduct = async (req, res) => {
   try {
     const newProduct = new Product(req.body); // Using Mongoose to create a product instance
     await newProduct.save(); // Save to MongoDB
+    console.log(newProduct);
     return res.status(201).json({
       message: "Product created successfully",
       newProduct,

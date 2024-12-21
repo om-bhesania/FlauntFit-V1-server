@@ -38,6 +38,24 @@ const ProductSchema = new mongoose.Schema(
         message: "Price must be a positive number",
       },
     },
+    gst: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (value) => ["5%", "12%", "18%", "28%"].includes(value),
+        message: "GST must be one of the following values: 5%, 12%, 18%, 28%",
+      },
+      default: "0",
+    },
+    costPrice: {
+      type: Number,
+      required: true,
+      validate: {
+        validator: (value) => value >= 0,
+        message: "Cost Price must be a positive number",
+      },
+      default: 0,
+    },
     salePrice: {
       type: Number,
       validate: {
@@ -59,19 +77,12 @@ const ProductSchema = new mongoose.Schema(
         message: "Quantity in stock must be a positive number",
       },
     },
-    // productImages: {
-    //   type: [String], // Array of strings
-    //   default: [],
-    // },
     video: {
       type: String,
     },
     sizeOptions: {
-      type: String,
+      type: Array,
     },
-    // colorOptions: {
-    //   type: String,
-    // },
     careInstructions: {
       type: String,
       validate: {
@@ -81,13 +92,9 @@ const ProductSchema = new mongoose.Schema(
     },
     inventoryStatus: {
       type: String,
-      enum: ["In Stock", "Out of Stock", "Discontinued"],
+      enum: ["In Stock", "Out of Stock", "Discontinued" , 'Coming Soon'],
       required: true,
     },
-    // countryOfOrigin: {
-    //   type: String,
-    //   required: true,
-    // },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
