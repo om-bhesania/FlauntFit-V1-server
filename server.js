@@ -20,17 +20,15 @@ const app = express();
 // Define allowed origins based on environment
 const allowedOrigins = [
   "http://localhost:5173", // Development URL
-  "https://mixbunch-dev.netlify.app/", // Production URL
+  "https://mixbunch-dev.netlify.app", // Production URL
 ];
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // Development URL
-      "https://mixbunch-dev.netlify.app/", // Production URL
-    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // Include credentials (cookies) in the request
+
+    optionsSuccessStatus: 200,
+    credentials: true,
   })
 );
 
