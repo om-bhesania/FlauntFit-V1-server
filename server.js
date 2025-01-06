@@ -72,12 +72,19 @@ app.get("/", (req, res) => {
   `);
 });
 
+
+
 // Define routes
 app.use("/v1/users", userRoutes);
 app.use("/v1/auth", authRoutes);
 app.use("/v1/products", productRouter);
 app.use(fileUpload()); // This line should be placed before your upload route
 app.use("/v1/upload", fileUploadRouter);
+
+
+
+
+
 
 // Connect to MongoDB
 const prepareServer = async () => {

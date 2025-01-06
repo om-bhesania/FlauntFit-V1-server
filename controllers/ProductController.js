@@ -61,7 +61,12 @@ const validateProductData = (data) => {
     errors.careInstructions = "Care instructions can't exceed 500 characters";
   }
 
-  const validStatuses = ["In Stock", "Out of Stock", "Discontinued", "Coming Soon"];
+  const validStatuses = [
+    "In Stock",
+    "Out of Stock",
+    "Discontinued",
+    "Coming Soon",
+  ];
   if (!data.inventoryStatus || !validStatuses.includes(data.inventoryStatus)) {
     errors.inventoryStatus = "Invalid Inventory status";
   }
@@ -85,13 +90,11 @@ export const createProduct = async (req, res) => {
   try {
     const newProduct = new Product(req.body); // Using Mongoose to create a product instance
     await newProduct.save(); // Save to MongoDB
-    console.log(newProduct);
     return res.status(201).json({
       message: "Product created successfully",
       newProduct,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json(formatErrorResponse(error));
   }
 };
@@ -102,7 +105,7 @@ export const getProducts = async (req, res) => {
     return res.status(200).json({
       message: "Products retrieved successfully",
       count: products.length,
-      products,
+      products, 
     });
   } catch (error) {
     return res.status(500).json("Something went wrong with the server");
@@ -154,7 +157,6 @@ export const updateProduct = async (req, res) => {
     return res.status(500).json(formatErrorResponse(error));
   }
 };
-
 
 export const deleteProduct = async (req, res) => {
   try {

@@ -23,7 +23,6 @@ const UploadFile = async (data) => {
  
     return autoCropUrl;
   } catch (error) {
-    console.log(error);
     throw new Error("Upload failed");
   }
 };

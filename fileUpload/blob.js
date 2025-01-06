@@ -93,7 +93,6 @@ const uploadFile = async (req, res) => {
 
     const stream = createReadStream(file.filepath);
 
-    // console.log(process.env.VITE_BLOB_READ_WRITE_TOKEN)
 
     const { url } = await put(fileName, stream, {
       contentType: file.mimetype,
