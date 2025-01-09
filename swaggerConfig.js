@@ -10,10 +10,9 @@ const options = {
     },
     servers: [
       {
-        url: [
-          "http://localhost:3012",
-          "https://flauntfit-v1-server.onrender.com/",
-        ], // Update with your server URL
+        url: "http://localhost:3012",
+        url: "https://flauntfit-v1-server.onrender.com/",
+        // Update with your server URL
       },
     ],
   },
