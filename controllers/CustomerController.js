@@ -79,12 +79,9 @@ export const createCustomer = async (req, res) => {
     await newCustomer.save();
     return res.status(201).json({
       response: {
-        message:'Customer Added Successfully',
-        data: {
-          data: {
-            customers: [newCustomer],
-          },
-        },
+        status: "Success",
+        message: "Customer Added Successfully",
+        newCustomer,
       },
     });
   } catch (error) {
@@ -96,13 +93,12 @@ export const createCustomer = async (req, res) => {
 export const getCustomers = async (req, res) => {
   try {
     const customers = await Customer.find();
+    console.log(customers);
     return res.status(200).json({
       response: {
-        data: {
-          data: {
-            customers,
-          },
-        },
+        status: "Success",
+        message: "Data fetched suceesfully",
+        customers,
       },
     });
   } catch (error) {
@@ -132,11 +128,9 @@ export const getCustomerById = async (req, res) => {
     }
     return res.status(200).json({
       response: {
-        data: {
-          data: {
-            customers: [customer],
-          },
-        },
+        status: "Success",
+        message: "Data Fetched Successfully",
+        customer,
       },
     });
   } catch (error) {
@@ -184,12 +178,9 @@ export const updateCustomer = async (req, res) => {
     }
     return res.status(200).json({
       response: {
-        message:'Customer Updated Successfully',
-        data: {
-          data: {
-            customers: [updatedCustomer],
-          },
-        },
+        status: "Success",
+        message: "Customer Updated Successfully",
+        updatedCustomer,
       },
     });
   } catch (error) {
@@ -216,7 +207,7 @@ export const deleteCustomer = async (req, res) => {
     }
     return res.status(200).json({
       response: {
-        status: 'Success',
+        status: "Success",
         message: "Customer Deleted Successfully",
       },
     });
