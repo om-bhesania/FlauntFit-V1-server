@@ -88,7 +88,10 @@ export const createProduct = async (req, res) => {
   }
 
   try {
-    const newProduct = new Product(req.body); // Using Mongoose to create a product instance
+    const newProduct = new Product({
+      ...req.body,
+      user: req.user._id, // Associate the product with the authenticated user
+    });
     await newProduct.save(); // Save to MongoDB
     return res.status(201).json({
       message: "Product created successfully",
@@ -101,13 +104,14 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find(); // Find all products using Mongoose
+    const products = await Product.find({ user: req?.user._id });
     return res.status(200).json({
       message: "Products retrieved successfully",
       count: products.length,
-      products, 
+      products,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json("Something went wrong with the server");
   }
 };
@@ -131,24 +135,25 @@ export const updateProduct = async (req, res) => {
     return res.status(400).json({ errors });
   }
 
-  // Modify the payload to replace 0 or empty fields with an empty string
-  const updatedPayload = Object.keys(req.body).reduce((acc, key) => {
-    if (req.body[key] === 0 || req.body[key] === "") {
-      acc[key] = ""; // Set to empty string if value is 0 or empty
-    } else {
-      acc[key] = req.body[key]; // Otherwise, retain the original value
-    }
-    return acc;
-  }, {});
-
   try {
+    const product = await Product.findById(req.params.id);
+
+    // Check if the product belongs to the authenticated user
+    if (product.user.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this product" });
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      updatedPayload,
-      { new: true } // Return the updated product after update
+      req.body,
+      { new: true }
     );
-    if (!updatedProduct)
+    if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
+    }
+
     return res.status(200).json({
       message: "Product updated successfully",
       updatedProduct,

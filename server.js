@@ -10,6 +10,7 @@ import productRouter from "./Routes/productRoutes.js";
 import fileUploadRouter from "./Routes/fileUploadRouter.js";
 import fileUpload from "express-fileupload";
 import dotenv from "dotenv";
+import customerRouter from "./Routes/customerRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -49,30 +50,8 @@ app.use(limiter);
 
 // Define a root route to display "hello"
 app.get("/", (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Flunt Fit API</title>
-    </head>
-    <body>
-      <div>
-        <h1>Flunt Fit API Endpoints</h1>
-        <ul>
-          <li>Users: "/v1/users"</li>
-          <li>Auth: "/v1/auth"</li>
-          <li>Products: "/v1/products"</li>
-          <li>File Upload: "/v1/upload"</li>
-        </ul>
-      </div>
-    </body>
-    </html>
-  `);
+  res.send(`Mix Bunch BackEnd`);
 });
-
-
 
 // Define routes
 app.use("/v1/users", userRoutes);
@@ -80,11 +59,13 @@ app.use("/v1/auth", authRoutes);
 app.use("/v1/products", productRouter);
 app.use(fileUpload()); // This line should be placed before your upload route
 app.use("/v1/upload", fileUploadRouter);
+app.use("/v1/customers", customerRouter);
 
+// swagger config
+import swaggerUi from "swagger-ui-express";
+import swaggerSpecs from "./swaggerConfig.js";
 
-
-
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Connect to MongoDB
 const prepareServer = async () => {

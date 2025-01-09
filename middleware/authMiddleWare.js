@@ -1,17 +1,25 @@
-// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
+import User from "../models/User.js"; // Ensure you have the correct User model
 
-export const verifyToken = (req, res, next) => {
-  const token = req.cookies.authToken; // Access token from cookies
+export const protect = async (req, res, next) => {
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
   if (!token) {
-    return res.status(403).json({ message: "No token provided." });
+    return res.status(401).json({ message: "Not authorized, no token" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.id; // Attach user ID to the request
-    next(); // Proceed to the next middleware or route handler
+    const decoded = jwt.verify(
+      token,
+      "@(&)!@#iasdhasdhJASDHASJKD9123290@UudbU@h2eniUHU@NBEUINID32"
+    ); // Ensure you have the JWT_SECRET set correctly
+    req.user = await User.findById(decoded.id); // Add the user to the request object
+    if (!req.user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    next();
   } catch (error) {
-    res.status(401).json({ message: "Unauthorized access." });
+    res.status(401).json({ message: "Not authorized, token failed" });
   }
 };

@@ -92,9 +92,10 @@ const ProductSchema = new mongoose.Schema(
     },
     inventoryStatus: {
       type: String,
-      enum: ["In Stock", "Out of Stock", "Discontinued" , 'Coming Soon'],
+      enum: ["In Stock", "Out of Stock", "Discontinued", "Coming Soon"],
       required: true,
     },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to the user who created the product
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

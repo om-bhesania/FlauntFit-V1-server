@@ -98,7 +98,6 @@ authRoutes.post("/login", async (req, res) => {
     res.json({
       status: "success",
       data: {
-        status: "success",
         data: { userEmail: user.email, name: user.name, token },
       },
     });
