@@ -91,7 +91,7 @@ authRoutes.post("/login", async (req, res) => {
       httpOnly: true, // Prevent JavaScript access
       secure: process.env.NODE_ENV === "production", // Use HTTPS in production
       sameSite: "strict", // Prevent CSRF
-      maxAge: 3600 * 1000, // 1 hour
+      maxAge: 3600 * 4000, // 4 hour
     });
 
     // Send response with user details (excluding token)
