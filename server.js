@@ -11,7 +11,10 @@ import fileUploadRouter from "./Routes/fileUploadRouter.js";
 import fileUpload from "express-fileupload";
 import dotenv from "dotenv";
 import customerRouter from "./Routes/customerRoutes.js";
-
+import pingRouter from "./Routes/pingRoutes.js";
+// swagger config
+import swaggerUi from "swagger-ui-express";
+import swaggerSpecs from "./swaggerConfig.js";
 // Load environment variables
 dotenv.config();
 
@@ -42,8 +45,8 @@ app.use(bodyParser.urlencoded({ limit: "40mb", extended: true }));
 
 // Rate limiting middleware
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 20 * 60 * 1000, // 15 minutes
+  max: 200, // Limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter);
@@ -61,9 +64,7 @@ app.use(fileUpload()); // This line should be placed before your upload route
 app.use("/v1/upload", fileUploadRouter);
 app.use("/v1/customers", customerRouter);
 
-// swagger config
-import swaggerUi from "swagger-ui-express";
-import swaggerSpecs from "./swaggerConfig.js";
+
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 

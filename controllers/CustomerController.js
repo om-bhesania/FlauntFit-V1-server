@@ -1,6 +1,5 @@
-import Customer from "../models/CustomerModel.js"; // Ensure correct import path
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken"; // Assuming you're using JWT for authentication
+import Customer from "../models/CustomerModel.js"; // Ensure correct import path
 
 // Custom validation function for customer data
 const validateCustomerData = (data) => {
@@ -35,27 +34,6 @@ const formatErrorResponse = (errors) => {
   };
 };
 
-// Middleware to check authentication
-const authenticateUser = (req, res, next) => {
-  const token = req.headers["authorization"];
-
-  if (!token) {
-    return res.status(401).json({
-      message: "Authentication token is required",
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      message: "Invalid or expired token",
-    });
-  }
-};
-
 // Create a new customer
 export const createCustomer = async (req, res) => {
   const errors = validateCustomerData(req.body);
@@ -66,6 +44,7 @@ export const createCustomer = async (req, res) => {
   // Check for duplicate email or phone
   const existingCustomer = await Customer.findOne({
     $or: [{ email: req.body.email }, { phone: req.body.phone }],
+    user: req.user._id,
   });
 
   if (existingCustomer) {
@@ -75,7 +54,10 @@ export const createCustomer = async (req, res) => {
   }
 
   try {
-    const newCustomer = new Customer(req.body);
+    const newCustomer = new Customer({
+      ...req.body,
+      user: req.user._id, // Associate the authenticated user
+    });
     await newCustomer.save();
     return res.status(201).json({
       response: {
@@ -92,12 +74,11 @@ export const createCustomer = async (req, res) => {
 // Get all customers
 export const getCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find();
-    console.log(customers);
+    const customers = await Customer.find({ user: req.user._id });
     return res.status(200).json({
       response: {
         status: "Success",
-        message: "Data fetched suceesfully",
+        message: "Data fetched successfully",
         customers,
       },
     });
@@ -109,27 +90,24 @@ export const getCustomers = async (req, res) => {
   }
 };
 
+
 // Get a customer by ID
 export const getCustomerById = async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({
-      message: "Invalid customer ID format",
-    });
+    return res.status(400).json({ message: "Invalid customer ID format" });
   }
 
   try {
-    const customer = await Customer.findById(id);
+    const customer = await Customer.findOne({ _id: id, user: req.user._id });
     if (!customer) {
-      return res.status(404).json({
-        message: "Customer not found",
-      });
+      return res.status(404).json({ message: "Customer not found" });
     }
     return res.status(200).json({
       response: {
         status: "Success",
-        message: "Data Fetched Successfully",
+        message: "Data fetched successfully",
         customer,
       },
     });
@@ -137,6 +115,7 @@ export const getCustomerById = async (req, res) => {
     return res.status(500).json(formatErrorResponse(error));
   }
 };
+
 
 // Update a customer by ID
 export const updateCustomer = async (req, res) => {
@@ -148,34 +127,18 @@ export const updateCustomer = async (req, res) => {
   }
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({
-      message: "Invalid customer ID format",
-    });
-  }
-
-  // Check for duplicate email or phone
-  const existingCustomer = await Customer.findOne({
-    $or: [{ email: req.body.email }, { phone: req.body.phone }],
-    _id: { $ne: id },
-  });
-
-  if (existingCustomer) {
-    return res.status(400).json({
-      message: "Customer already exists",
-    });
+    return res.status(400).json({ message: "Invalid customer ID format" });
   }
 
   try {
-    const updatedCustomer = await Customer.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true } // Return the updated customer after update
-    );
-    if (!updatedCustomer) {
-      return res.status(404).json({
-        message: "Customer not found",
-      });
+    const customer = await Customer.findOne({ _id: id, user: req.user._id });
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
     }
+
+    const updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     return res.status(200).json({
       response: {
         status: "Success",
@@ -188,23 +151,25 @@ export const updateCustomer = async (req, res) => {
   }
 };
 
+
 // Delete a customer by ID
 export const deleteCustomer = async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({
-      message: "Invalid customer ID format",
-    });
+    return res.status(400).json({ message: "Invalid customer ID format" });
   }
 
   try {
-    const deletedCustomer = await Customer.findByIdAndDelete(id);
-    if (!deletedCustomer) {
-      return res.status(404).json({
-        message: "Customer not found",
-      });
+    const customer = await Customer.findOneAndDelete({
+      _id: id,
+      user: req.user._id,
+    });
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
     }
+
     return res.status(200).json({
       response: {
         status: "Success",
@@ -218,6 +183,7 @@ export const deleteCustomer = async (req, res) => {
     });
   }
 };
+
 
 // Delete all customers
 export const deleteAllCustomers = async (req, res) => {

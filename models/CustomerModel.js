@@ -19,6 +19,18 @@ const CustomerSchema = new mongoose.Schema({
     type: String,
     required: true, // Address is mandatory
   },
+  state: {
+    type: String,
+    required: true, // state is mandatory
+  },
+  city: {
+    type: String,
+    default: null, // city is optional
+  },
+  dob: {
+    type: Date,
+    default: null, // city is optional
+  },
   createdAt: {
     type: Date,
     default: Date.now, // Automatically sets the creation timestamp
@@ -27,6 +39,7 @@ const CustomerSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // Automatically sets the update timestamp
   },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Associate with user
 });
 
 // Add a pre-save hook to automatically update the `updatedAt` field
