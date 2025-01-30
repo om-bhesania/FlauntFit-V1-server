@@ -15,6 +15,7 @@ import pingRouter from "./Routes/pingRoutes.js";
 // swagger config
 import swaggerUi from "swagger-ui-express";
 import swaggerSpecs from "./swaggerConfig.js";
+import invoiceRouter from "./Routes/invoiceRoutes.js";
 // Load environment variables
 dotenv.config();
 
@@ -63,7 +64,7 @@ app.use("/v1/products", productRouter);
 app.use(fileUpload()); // This line should be placed before your upload route
 app.use("/v1/upload", fileUploadRouter);
 app.use("/v1/customers", customerRouter);
-
+app.use("/v1/invoices", invoiceRouter);
 
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));

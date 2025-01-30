@@ -47,15 +47,7 @@ const validateProductData = (data) => {
     errors.sku = "SKU is required";
   }
 
-  if (data.quantityInStock === undefined || data.quantityInStock === null) {
-    errors.quantityInStock = "Stock quantity is required";
-  } else if (
-    !Number.isInteger(data.quantityInStock) ||
-    data.quantityInStock < 0
-  ) {
-    errors.quantityInStock =
-      "Quantity cannot be negative and must be an integer";
-  }
+ 
 
   if (data.careInstructions && data.careInstructions.length > 500) {
     errors.careInstructions = "Care instructions can't exceed 500 characters";
@@ -94,6 +86,7 @@ export const createProduct = async (req, res) => {
     });
     await newProduct.save(); // Save to MongoDB
     return res.status(201).json({
+      status:201,
       message: "Product created successfully",
       newProduct,
     });
@@ -170,7 +163,7 @@ export const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
     // Validate the ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         message: "Invalid product ID format",
       });

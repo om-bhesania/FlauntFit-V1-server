@@ -71,7 +71,7 @@ const ProductSchema = new mongoose.Schema(
     },
     quantityInStock: {
       type: Number,
-      required: true,
+      required: false,
       validate: {
         validator: (value) => value >= 0,
         message: "Quantity in stock must be a positive number",

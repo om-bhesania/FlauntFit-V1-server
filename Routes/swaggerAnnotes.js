@@ -794,3 +794,292 @@
  *       400:
  *         description: No token provided
  */
+
+
+/**
+ * @swagger
+ * /v1/invoices:
+ *   post:
+ *     summary: Create a new invoice
+ *     description: Creates a new invoice for the authenticated user
+ *     tags:
+ *       - Invoices
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentDate:
+ *                 type: string
+ *                 format: date
+ *               invoiceNumber:
+ *                 type: string
+ *               cashier:
+ *                 type: string
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     item:
+ *                       type: string
+ *                     quantity:
+ *                       type: integer
+ *                     hsnSac:
+ *                       type: string
+ *                     price:
+ *                       type: number
+ *                       format: float
+ *                     total:
+ *                       type: number
+ *                       format: float
+ *                     unitPrice:
+ *                       type: number
+ *                       format: float
+ *                     gst:
+ *                       type: number
+ *                       format: float
+ *                     productDiscount:
+ *                       type: number
+ *                       format: float
+ *               gstPercentage:
+ *                 type: string
+ *               discountRate:
+ *                 type: number
+ *                 format: float
+ *               flatDiscount:
+ *                 type: number
+ *                 format: float
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               state:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               dob:
+ *                 type: string
+ *                 format: date
+ *               subtotal:
+ *                 type: number
+ *                 format: float
+ *               totalDiscount:
+ *                 type: number
+ *                 format: float
+ *               subtotalAfterDiscount:
+ *                 type: number
+ *                 format: float
+ *               totalBillingAmount:
+ *                 type: number
+ *                 format: float
+ *               sgst:
+ *                 type: number
+ *                 format: float
+ *               cgst:
+ *                 type: number
+ *                 format: float
+ *               totalUntaxedAmount:
+ *                 type: number
+ *                 format: float
+ *               gstAmount:
+ *                 type: number
+ *                 format: float
+ *     responses:
+ *       201:
+ *         description: Invoice created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Success
+ *                 message:
+ *                   type: string
+ *                   example: Invoice Created Successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Invoice'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Error
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong while creating the invoice
+ */
+
+/**
+ * @swagger
+ * /v1/invoices:
+ *   get:
+ *     summary: Get all invoices of the user
+ *     description: Retrieves all invoices associated with the authenticated user
+ *     tags:
+ *       - Invoices
+ *     responses:
+ *       200:
+ *         description: Invoices retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Success
+ *                 message:
+ *                   type: string
+ *                   example: Invoices Retrieved Successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Invoice'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Error
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong while retrieving invoices
+ */
+
+/**
+ * @swagger
+ * /v1/invoices/{id}:
+ *   get:
+ *     summary: Get a specific invoice by ID
+ *     description: Retrieves a specific invoice by ID for the authenticated user
+ *     tags:
+ *       - Invoices
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the invoice to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Invoice retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Success
+ *                 message:
+ *                   type: string
+ *                   example: Invoice Retrieved Successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Invoice'
+ *       404:
+ *         description: Invoice not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Error
+ *                 message:
+ *                   type: string
+ *                   example: Invoice not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Error
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong while retrieving the invoice
+ */
+
+/**
+ * @swagger
+ * /v1/invoices/{id}:
+ *   delete:
+ *     summary: Delete an invoice
+ *     description: Deletes a specific invoice by ID for the authenticated user
+ *     tags:
+ *       - Invoices
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the invoice to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Invoice deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Success
+ *                 message:
+ *                   type: string
+ *                   example: Invoice Deleted Successfully
+ *       404:
+ *         description: Invoice not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Error
+ *                 message:
+ *                   type: string
+ *                   example: Invoice not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: Error
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong while deleting the invoice
+ */
+
+ 
