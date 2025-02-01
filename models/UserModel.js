@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 
-// Define the schema for the User model
+// Define user roles
+const ROLES = ["owner", "manager", "employee"];
+
 const UserSchema = new mongoose.Schema({
   id: {
-    type: String, // UUID is stored as a string in MongoDB
+    type: String, // UUID stored as a string
     default: () => new mongoose.Types.ObjectId().toString(),
     required: true,
   },
@@ -32,15 +34,19 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // Automatically sets the update timestamp
   },
+  role: {
+    type: String,
+    enum: ROLES, // Restricts role values to predefined roles
+    default: "employee", // Default role is 'user'
+  },
 });
 
-// Add a pre-save hook to automatically update the `updatedAt` field
+// Auto-update `updatedAt` field before saving
 UserSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-// Create and export the User model
+// Export User model
 const User = mongoose.model("User", UserSchema);
-
 export default User;

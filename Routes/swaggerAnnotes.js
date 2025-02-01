@@ -32,6 +32,9 @@
  *               contact:
  *                 type: string
  *                 description: Optional contact information for the user.
+ *               role:
+ *                 type: string
+ *                 description: Optional contact information for the user.
  *     responses:
  *       200:
  *         description: User registered successfully
@@ -222,7 +225,6 @@
  *       401:
  *         description: Unauthorized - Invalid or missing token
  */
-
 
 /**
  * @swagger
@@ -794,7 +796,55 @@
  *       400:
  *         description: No token provided
  */
+/**
+ * @swagger
+ * /v1/auth/manager:
+ *   get:
+ *     summary: Manager route
+ *     description: Returns a welcome message for managers and admins.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Welcome Manager!"
+ *       401:
+ *         description: Unauthorized
+ */
 
+/**
+ * @swagger
+ * /v1/auth/user:
+ *   get:
+ *     summary: User route
+ *     description: Returns a welcome message for all authenticated users.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Welcome User!"
+ *       401:
+ *         description: Unauthorized
+ */
 
 /**
  * @swagger
@@ -1081,5 +1131,3 @@
  *                   type: string
  *                   example: Something went wrong while deleting the invoice
  */
-
- 
