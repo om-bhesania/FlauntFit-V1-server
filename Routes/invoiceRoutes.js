@@ -1,6 +1,11 @@
 import express from "express";
- 
-import { createInvoice, deleteInvoice, getInvoiceById, getUserInvoices } from "../controllers/InvoiceController.js";
+
+import {
+  createInvoice,
+  deleteInvoice,
+  getInvoiceById,
+  getUserInvoices,
+} from "../controllers/InvoiceController.js";
 import { protect } from "../middleware/authMiddleWare.js";
 
 const invoiceRouter = express.Router();

@@ -1,43 +1,52 @@
 import mongoose from "mongoose";
-
-// Define user roles
-const ROLES = ["owner", "manager", "employee"];
+import { v4 } from "uuid";
 
 const UserSchema = new mongoose.Schema({
-  id: {
-    type: String, // UUID stored as a string
-    default: () => new mongoose.Types.ObjectId().toString(),
-    required: true,
+  userId: {
+    type: String,
+    default: v4(), // Generates a UUID by default
+    unique: true, // Ensures uniqueness
   },
-  name: {
+  username: {
     type: String,
     required: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true, // Ensures email uniqueness
+    unique: true,
   },
   password: {
     type: String,
     required: true,
   },
-  contact: {
+  phone: {
+    type: Number,
+    required: true,
+  },
+  address: {
     type: String,
-    default: null, // Optional field
+    required: true,
+  },
+  role: {
+    type: String, // UUID from the payload
+    required: true,
+  },
+  roleName: {
+    type: String,
+    required: true,
+  },
+  createdBy: {
+    type: String,
+    required: false,
   },
   createdAt: {
     type: Date,
-    default: Date.now, // Automatically sets the creation timestamp
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now, // Automatically sets the update timestamp
-  },
-  role: {
-    type: String,
-    enum: ROLES, // Restricts role values to predefined roles
-    default: "employee", // Default role is 'user'
+    default: Date.now,
   },
 });
 
@@ -47,6 +56,6 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
-// Export User model
 const User = mongoose.model("User", UserSchema);
 export default User;
+

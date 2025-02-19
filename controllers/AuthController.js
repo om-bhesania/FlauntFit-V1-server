@@ -4,6 +4,8 @@ import { validationResult, body } from "express-validator";
 import User from "../models/UserModel.js"; // Ensure your User model is correctly set up
 import dotenv from "dotenv";
 import TokenBlacklist from "../middleware/blackListToken.js";
+import Role from "../models/RoleModel.js";
+import Permission from "../models/PermissionModel.js";
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -38,104 +40,152 @@ export const registerUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { username, email, password, contact, role } = req.body;
-
+  const { username, email, password, phone, address, role, roleName } =
+    req.body;
+console.log("role", role);
   try {
-    // ✅ Check if user already exists
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already in use" });
+      return res.status(400).json({
+        status: "Error",
+        message: "Email already in use",
+      });
     }
 
-    // ✅ Hash the password
+    // Find role by ID
+    const roleData = await Role.findOne({ roleId: role });
+    if (!roleData) {
+      return res.status(400).json({
+        status: "Error",
+        message: "Invalid role specified",
+      });
+    }
+console.log("roleData", roleData);
+    // Verify role has permissions
+    const permissions = await Permission.findOne({ roleId: role });
+    console.log("permissions", permissions);
+    if (!permissions) {
+      return res.status(400).json({
+        status: "Error",
+        message: "Role permissions not configured",
+      });
+    }
+
+    // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Create the new user with specified role
+    // Create the new user
     const user = new User({
-      name: username,
+      username,
       email,
-      password: hashedPassword,
-      contact,
+      password: hashedPassword, // Ensure hashed password is stored
+      phone,
+      address,
       role,
+      roleName,
     });
 
-    // ✅ Save the user to the database
     await user.save();
 
     res.status(201).json({
+      status: "Success",
       message: "User registered successfully",
-      user: {
+      data: {
         id: user._id,
-        name: user.name,
+        username: user.username,
         email: user.email,
+        phone: user.phone,
+        address: user.address,
         role: user.role,
+        roleName: user.roleName,
       },
     });
   } catch (error) {
     console.error("Error during registration:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({
+      status: "Error",
+      message: "Internal Server Error",
+    });
   }
 };
 
-// ✅ **Login User**
+//✅  **Login user**
 export const loginUser = async (req, res) => {
+  // Validate request input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ status: "Error", errors: errors.array() });
   }
 
   const { email, password } = req.body;
 
   try {
-    // ✅ Find user by email
+    // ✅ Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(404).json({
+        status: "Error",
+        message: "User does not exist",
+      });
     }
 
-    // ✅ Compare password with hashed password
+    console.log("Stored Hashed Password:", user.password);
+    console.log("Entered Password:", password);
+    // ✅ Verify password using bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    console.log("isPasswordValid:", isPasswordValid);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        status: "Error",
+        message: "Wrong email or password",
+      });
     }
 
-    // ✅ Check if the token is blacklisted
-    const blacklistedToken = await TokenBlacklist.findOne({
-      token: user.token,
+    // ✅ Check if user's role permissions exist
+    const permissions = await Permission.findOne({ roleId: user.role });
+    if (!permissions) {
+      return res.status(400).json({
+        status: "Error",
+        message: "User role permissions not found",
+      });
+    }
+
+    // ✅ Generate a new JWT token
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRATION,
     });
-    if (blacklistedToken) {
-      return res
-        .status(401)
-        .json({ message: "Token is blacklisted. Please log in again." });
-    }
-
-    // ✅ Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, role: user.role }, // Include role in token
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRATION }
-    );
 
     // ✅ Set the token in a secure HttpOnly cookie
     res.cookie("authToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 3600 * 5000, // 5 hours
+      maxAge: 5 * 60 * 60 * 1000, // 5 hours
     });
 
+    // ✅ Send response with user data
     res.json({
-      status: "success",
+      status: "Success",
       data: {
-        userEmail: user.email,
-        name: user.name,
-        role: user.role,
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        phone: user.phone,
+        address: user.address,
+        roleId: user.role,
+        roleName: user.roleName,
+        permissions: permissions.module,
         token,
       },
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({
+      status: "Error",
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -143,7 +193,7 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
   try {
     const token =
-      req.headers.authorization?.split(" ")[1] || req.cookies.authToken;
+      req?.headers?.authorization?.split(" ")[1] || req?.cookies?.authToken;
 
     if (!token) {
       return res.status(400).json({ message: "No token provided" });

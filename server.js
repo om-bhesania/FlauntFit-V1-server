@@ -16,6 +16,9 @@ import pingRouter from "./Routes/pingRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpecs from "./swaggerConfig.js";
 import invoiceRouter from "./Routes/invoiceRoutes.js";
+import roleRoutes from "./Routes/roleRoutes.js";
+import permissionRoutes from "./Routes/permissionRoutes.js";
+import { checkPermission } from "./controllers/PermissionController.js";
 // Load environment variables
 dotenv.config();
 
@@ -65,7 +68,8 @@ app.use(fileUpload()); // This line should be placed before your upload route
 app.use("/v1/upload", fileUploadRouter);
 app.use("/v1/customers", customerRouter);
 app.use("/v1/invoices", invoiceRouter);
-
+app.use("/v1/roles", roleRoutes);
+app.use("/v1/permissions", permissionRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 

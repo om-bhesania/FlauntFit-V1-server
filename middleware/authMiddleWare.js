@@ -44,3 +44,32 @@ export const authMiddleware = async (req, res, next) => {
     res.status(401).json({ message: "Invalid Token" });
   }
 };
+
+// middlewares/authMiddleware.js
+
+export const extractUserFromToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "Error",
+        message: "No token provided",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Role is directly available in token
+    req.user = {
+      roleId: decoded.role,
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      status: "Error",
+      message: "Invalid or expired token",
+    });
+  }
+};

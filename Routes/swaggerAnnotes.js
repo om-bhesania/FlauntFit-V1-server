@@ -665,6 +665,8 @@
  *                 type: string
  *               password:
  *                 type: string
+ *               role:
+ *                 type: string
  *             required:
  *               - name
  *               - email
@@ -769,7 +771,54 @@
  *       404:
  *         description: User not found
  */
+/**
+ * @swagger
+ * /v1/users:
+ *   delete:
+ *     summary: Delete all users
+ *     description: Deletes all users from the database.
+ *     tags:
+ *       - Users
+ *     responses:
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Bad Request
+ */
 
+/**
+ * @swagger
+ * /v1/users/{id}/role:
+ *   put:
+ *     summary: Assign a role to a user
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 description: The role to assign
+ *     responses:
+ *       200:
+ *         description: Role assigned successfully
+ */
 /**
  * @swagger
  * /v1/auth/ping:
@@ -796,6 +845,7 @@
  *       400:
  *         description: No token provided
  */
+
 /**
  * @swagger
  * /v1/auth/manager:
@@ -1130,4 +1180,265 @@
  *                 message:
  *                   type: string
  *                   example: Something went wrong while deleting the invoice
+ */
+
+// Roles
+
+/**
+ * @swagger
+ * /v1/roles/create:
+ *   post:
+ *     summary: Create a new role
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Role created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Invalid input or role already exists
+ *       401:
+ *         description: Unauthorized
+ *
+ * @swagger
+ * /v1/roles/create-many:
+ *   post:
+ *     summary: Create multiple roles
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Roles created successfully
+ *       400:
+ *         description: Some roles already exist
+ *       401:
+ *         description: Unauthorized
+ *
+ * @swagger
+ * /v1/roles:
+ *   get:
+ *     summary: Get all roles
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all roles
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ * @swagger
+ * /v1/roles/{id}:
+ *   get:
+ *     summary: Get role by ID
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Role ID
+ *     responses:
+ *       200:
+ *         description: Role details
+ *       404:
+ *         description: Role not found
+ *       401:
+ *         description: Unauthorized
+ *
+ *   put:
+ *     summary: Update role by ID
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Role updated successfully
+ *       404:
+ *         description: Role not found
+ *       401:
+ *         description: Unauthorized
+ *
+ *   delete:
+ *     summary: Delete role by ID
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Role deleted successfully
+ *       404:
+ *         description: Role not found
+ *       401:
+ *         description: Unauthorized
+ *
+ * @swagger
+ * /v1/roles:
+ *   delete:
+ *     summary: Delete all roles
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All roles deleted successfully
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /v1/permissions/initialize/{id}:
+ *   post:
+ *     summary: Initialize permissions for a role
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Role ID
+ *     responses:
+ *       201:
+ *         description: Permissions initialized successfully
+ *       400:
+ *         description: Permissions already initialized for this role
+ *       404:
+ *         description: Role not found
+ *       500:
+ *         description: Internal server error
+ */
+/**
+ * @swagger
+ * /v1/permissions/{id}:
+ *   get:
+ *     summary: Get permissions by roleId
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Role ID
+ *     responses:
+ *       200:
+ *         description: Permissions fetched successfully
+ *       404:
+ *         description: No permissions found for this role
+ *       500:
+ *         description: Internal server error
+ */
+/**
+ * @swagger
+ * /v1/permissions/{id}/{module}:
+ *   put:
+ *     summary: Update permissions for a specific module
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Permission ID
+ *       - in: path
+ *         name: module
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Module name
+ *       - in: body
+ *         name: permissions
+ *         required: true
+ *         schema:
+ *           type: object
+ *         description: Permissions object
+ *     responses:
+ *       200:
+ *         description: Permissions updated successfully
+ *       404:
+ *         description: Permission not found
+ *       500:
+ *         description: Internal server error
+ */
+/**
+ * @swagger
+ * /v1/permissions/check:
+ *   post:
+ *     summary: Check permission middleware
+ *     parameters:
+ *       - in: body
+ *         name: module
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Module name
+ *       - in: body
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Action name
+ *     responses:
+ *       403:
+ *         description: Permission denied
+ *       500:
+ *         description: Internal server error
+ */
+
+
+/**
+ * @swagger
+ * /v1/permissions/get-all:
+ *   get:
+ *     summary: Get all permissions
+ *     responses:
+ *       200:
+ *         description: Permissions retrieved successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
  */

@@ -3,10 +3,7 @@ import dotenv from "dotenv"; // Correct import syntax
 
 // Load environment variables
 dotenv.config();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // The same secret used to sign the token
-
-
-
+const JWT_SECRET = process.env.JWT_SECRET;
 export const pingUser = (req, res) => {
   // Get token from either body, cookies, or authorization header
   const token = req.body.token || req.headers.authorization?.split(" ")[1];
